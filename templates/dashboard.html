@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Weather Analytics{% endblock %}
+
+{% block content %}
+<div class="page-hero page-hero-sm">
+    <div class="container">
+        <h1 class="page-title"><i class="bi bi-grid-3x3-gap me-3"></i>Analytics Dashboard</h1>
+        <p class="page-subtitle">All generated plots from the ML pipeline — {{ plots|length }} visualization(s) available</p>
+    </div>
+</div>
+
+<div class="container py-5">
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-5">
+        {% set stat_cards = [
+            ("bi-thermometer-half", "#ff6b6b", "Avg Temperature", stats.avg_temp),
+            ("bi-droplet-half",     "#00d4ff", "Avg Humidity",    stats.avg_humidity),
+            ("bi-wind",             "#6bcb77", "Countries",       stats.countries),
+            ("bi-lungs",            "#ffd93d", "Avg AQI",         stats.avg_aqi),
+            ("bi-calendar-range",   "#c77dff", "Date Range",      stats.date_range),
+            ("bi-database",         "#ff9f43", "Total Records",   stats.total_rows),
+        ] %}
+        {% for icon, color, label, value in stat_cards %}
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="mini-stat-card" style="--accent: {{ color }}">
+                <i class="bi {{ icon }} mini-stat-icon"></i>
+                <div class="mini-stat-value">{{ value }}</div>
+                <div class="mini-stat-label">{{ label }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar glass-card mb-4 p-3">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0 text-white"><i class="bi bi-images me-2 text-primary"></i>Plot Gallery</h5>
+            </div>
+            <div class="col-md-6 mt-2 mt-md-0">
+                <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="temperature">Temperature</button>
+                    <button class="filter-btn" data-filter="climate">Climate</button>
+                    <button class="filter-btn" data-filter="aqi">AQI</button>
+                    <button class="filter-btn" data-filter="model">Models</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plots Grid -->
+    {% if plots %}
+    <div class="row g-4" id="plotsGrid">
+        {% for plot in plots %}
+        {% set filter_class = "" %}
+        {% if "temperature" in plot.filename or "02_" in plot.filename or "06_" in plot.filename or "12_" in plot.filename or "13_" in plot.filename %}
+            {% set filter_class = "temperature" %}
+        {% elif "aqi" in plot.filename or "04_" in plot.filename or "14_" in plot.filename %}
+            {% set filter_class = "aqi" %}
+        {% elif "climate" in plot.filename or "15_" in plot.filename or "16_" in plot.filename %}
+            {% set filter_class = "climate" %}
+        {% elif "forecast" in plot.filename or "model" in plot.filename or "08_" in plot.filename or "09_" in plot.filename or "10_" in plot.filename or "11_" in plot.filename %}
+            {% set filter_class = "model" %}
+        {% endif %}
+
+        <div class="col-md-6 col-xl-4 plot-item" data-category="{{ filter_class }}">
+            <div class="plot-card-dash" onclick="openPlotModal('{{ plot.url }}', '{{ plot.title }}')">
+                <div class="plot-img-wrapper">
+                    <img src="{{ plot.url }}" alt="{{ plot.title }}" class="plot-img-dash" loading="lazy"
+                         onerror="this.closest('.col-md-6').style.display='none'">
+                </div>
+                <div class="plot-info">
+                    <span class="plot-title-dash">{{ plot.title }}</span>
+                    <span class="plot-expand"><i class="bi bi-arrows-fullscreen"></i></span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state glass-card text-center py-5">
+        <div class="empty-icon">📊</div>
+        <h4 class="text-white mt-3">No Plots Generated Yet</h4>
+        <p class="text-muted">Run the ML pipeline to generate analytics visualizations.</p>
+        <button class="btn btn-primary-glow mt-2" onclick="runPipeline()">
+            <i class="bi bi-play-circle me-2"></i>Run Pipeline Now
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Plot Modal -->
+<div class="modal fade" id="plotModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="plotModalTitle">Plot</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-2 text-center">
+                <img id="plotModalImg" src="" alt="" class="img-fluid rounded" style="max-height:80vh">
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <a id="plotDownloadBtn" href="#" download class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-download me-1"></i>Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const filter = this.dataset.filter;
+        document.querySelectorAll('.plot-item').forEach(item => {
+            if (filter === 'all' || item.dataset.category === filter) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+
+function openPlotModal(url, title) {
+    document.getElementById('plotModalImg').src = url;
+    document.getElementById('plotModalTitle').textContent = title;
+    document.getElementById('plotDownloadBtn').href = url;
+    new bootstrap.Modal(document.getElementById('plotModal')).show();
+}
+</script>
+{% endblock %}

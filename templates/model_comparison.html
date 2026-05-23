@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}Model Comparison — WeatherAI{% endblock %}
+
+{% block content %}
+<div class="page-hero page-hero-sm">
+    <div class="container">
+        <h1 class="page-title"><i class="bi bi-trophy me-3"></i>Model Performance Comparison</h1>
+        <p class="page-subtitle">Benchmarking 5 ML models — RMSE, MAE, MAPE and R² on held-out test data</p>
+    </div>
+</div>
+
+<div class="container py-5">
+
+    <!-- Best Model Podium -->
+    <div class="row g-4 mb-5 justify-content-center">
+        <div class="col-12 text-center mb-2">
+            <span class="section-tag">Leaderboard</span>
+            <h3 class="text-white mt-2">Model Rankings</h3>
+        </div>
+        {% if results %}
+        {% set sorted_results = results | sort(attribute='R2', reverse=True) %}
+        {% for r in sorted_results[:3] %}
+        <div class="col-md-4">
+            <div class="podium-card {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% else %}bronze{% endif %}">
+                <div class="podium-rank">{{ ["🥇","🥈","🥉"][loop.index0] }}</div>
+                <div class="podium-model">{{ r.Model }}</div>
+                <div class="podium-r2">R² = {{ r.R2 }}</div>
+                <div class="podium-metrics">
+                    <span>RMSE: {{ r.RMSE }}</span>
+                    <span>MAE: {{ r.MAE }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Metrics Table -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="text-white mb-3">
+                    <i class="bi bi-table me-2 text-primary"></i>Full Metrics Table
+                    <span class="badge bg-primary ms-2">{{ results|length }} Models</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover" id="metricsTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Model</th>
+                                <th>RMSE ↓ <small class="text-muted">(lower is better)</small></th>
+                                <th>MAE ↓</th>
+                                <th>MAPE ↓ (%)</th>
+                                <th>R² ↑ <small class="text-muted">(higher is better)</small></th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in results | sort(attribute='R2', reverse=True) %}
+                            <tr {% if loop.index == 1 %}class="table-warning table-success-subtle"{% endif %}>
+                                <td>
+                                    {{ ["🥇","🥈","🥉","4️⃣","5️⃣","6️⃣"][loop.index0] }}
+                                </td>
+                                <td><strong>{{ r.Model }}</strong></td>
+                                <td>
+                                    <span class="metric-badge rmse">{{ r.RMSE }}</span>
+                                </td>
+                                <td>
+                                    <span class="metric-badge mae">{{ r.MAE }}</span>
+                                </td>
+                                <td>{{ r.MAPE }}%</td>
+                                <td>
+                                    <span class="metric-badge r2">{{ r.R2 }}</span>
+                                </td>
+                                <td>
+                                    <div class="perf-bar-wrapper">
+                                        <div class="perf-bar" style="width: {{ (r.R2 * 100)|round }}%"></div>
+                                        <span class="perf-pct">{{ (r.R2 * 100)|round(1) }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <h6 class="text-white mb-3"><i class="bi bi-bar-chart me-2"></i>RMSE Comparison</h6>
+                <canvas id="rmseChart" height="200"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <h6 class="text-white mb-3"><i class="bi bi-bar-chart me-2"></i>R² Score</h6>
+                <canvas id="r2Chart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Detail Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h5 class="text-white mb-3"><i class="bi bi-info-circle me-2 text-info"></i>Model Details</h5>
+        </div>
+        {% set model_info = {
+            "Linear Regression": ("bi-graph-up", "#00d4ff", "Baseline", "OLS regression on engineered features. Fast, interpretable, but limited in capturing non-linear weather patterns. Establishes the performance floor."),
+            "Random Forest": ("bi-tree", "#6bcb77", "Ensemble", "200 decision trees with max_depth=12. Handles missing values gracefully, excellent for tabular weather data with mixed feature types."),
+            "XGBoost": ("bi-lightning-charge", "#ffd93d", "Gradient Boost", "500 boosted trees with learning_rate=0.05. Best single-model performance with histogram-based training for speed on large datasets."),
+            "Prophet": ("bi-calendar-event", "#c77dff", "Time Series", "Facebook's Prophet with daily/weekly/yearly seasonality. Specializes in capturing temporal patterns and holiday effects."),
+            "LSTM": ("bi-cpu", "#ff6b6b", "Deep Learning", "2-layer LSTM with dropout and early stopping. Captures long-range temporal dependencies in the hourly resampled time series."),
+            "Stacking Ensemble": ("bi-layers", "#ff9f43", "Meta-Learner", "Ridge Regression meta-learner combining LR + RF + XGBoost out-of-fold predictions. Achieves the overall best accuracy."),
+        } %}
+        {% for r in results %}
+        {% set info = model_info.get(r.Model, ("bi-cpu", "#aaa", "ML Model", "Advanced machine learning model.")) %}
+        <div class="col-md-6 col-lg-4">
+            <div class="model-detail-card glass-card p-4" style="--accent: {{ info[1] }}">
+                <div class="model-detail-header">
+                    <i class="bi {{ info[0] }}" style="color: {{ info[1] }}; font-size:1.8rem"></i>
+                    <div>
+                        <div class="model-detail-name">{{ r.Model }}</div>
+                        <span class="model-detail-tag">{{ info[2] }}</span>
+                    </div>
+                </div>
+                <p class="model-detail-desc text-muted small mt-3">{{ info[3] }}</p>
+                <div class="model-detail-metrics">
+                    <div class="dm-item">
+                        <span class="dm-label">RMSE</span>
+                        <span class="dm-val">{{ r.RMSE }}</span>
+                    </div>
+                    <div class="dm-item">
+                        <span class="dm-label">R²</span>
+                        <span class="dm-val">{{ r.R2 }}</span>
+                    </div>
+                    <div class="dm-item">
+                        <span class="dm-label">MAE</span>
+                        <span class="dm-val">{{ r.MAE }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Model Plots -->
+    {% if plots %}
+    <h5 class="text-white mb-4"><i class="bi bi-images me-2 text-primary"></i>Model Plots</h5>
+    <div class="row g-4">
+        {% for plot in plots %}
+        <div class="col-md-6">
+            <div class="glass-card p-3">
+                <h6 class="text-muted small mb-2">{{ plot.title }}</h6>
+                <img src="{{ plot.url }}" alt="{{ plot.title }}" class="img-fluid rounded"
+                     style="width:100%; cursor:zoom-in"
+                     onclick="openPlotModal('{{ plot.url }}', '{{ plot.title }}')"
+                     onerror="this.closest('.col-md-6').style.display='none'">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Plot Modal -->
+<div class="modal fade" id="plotModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="plotModalTitle">Plot</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-2 text-center">
+                <img id="plotModalImg" src="" alt="" class="img-fluid rounded" style="max-height:80vh">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const results = {{ results | tojson }};
+const labels = results.map(r => r.Model);
+const colors = ['#00d4ff','#6bcb77','#ffd93d','#ff6b6b','#c77dff','#ff9f43'];
+
+// RMSE Chart (lower=better)
+new Chart(document.getElementById('rmseChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels,
+        datasets: [{
+            label: 'RMSE',
+            data: results.map(r => r.RMSE),
+            backgroundColor: colors,
+            borderRadius: 6,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: '#aaa', maxRotation: 30 }, grid: { color: '#333' } },
+            y: { ticks: { color: '#aaa' }, grid: { color: '#333' } }
+        }
+    }
+});
+
+// R² Chart (higher=better)
+new Chart(document.getElementById('r2Chart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels,
+        datasets: [{
+            label: 'R²',
+            data: results.map(r => r.R2),
+            backgroundColor: colors,
+            borderRadius: 6,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: '#aaa', maxRotation: 30 }, grid: { color: '#333' } },
+            y: { ticks: { color: '#aaa' }, grid: { color: '#333' }, min: 0.8, max: 1 }
+        }
+    }
+});
+
+function openPlotModal(url, title) {
+    document.getElementById('plotModalImg').src = url;
+    document.getElementById('plotModalTitle').textContent = title;
+    new bootstrap.Modal(document.getElementById('plotModal')).show();
+}
+</script>
+{% endblock %}

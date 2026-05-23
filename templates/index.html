@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Weather Trend Forecasting — AI-Powered Global Weather Analytics{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════ HERO ══════════════════════════════════════ -->
+<section class="hero-section">
+    <div class="hero-bg-animated"></div>
+    <div class="hero-particles" id="particles"></div>
+    <div class="container hero-content">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-7">
+                <div class="hero-tag animate-fadeup">
+                    <span class="tag-dot"></span>
+                    PM Accelerator · Data Science Internship
+                </div>
+                <h1 class="hero-title animate-fadeup delay-1">
+                    Weather Trend<br>
+                    <span class="gradient-text">Forecasting</span>
+                </h1>
+                <p class="hero-subtitle animate-fadeup delay-2">
+                    AI-powered global weather analytics platform using 5 ML models —
+                    Linear Regression, Random Forest, XGBoost, Prophet & LSTM —
+                    on 700,000+ real-world weather observations.
+                </p>
+                <div class="hero-actions animate-fadeup delay-3">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary-glow btn-lg">
+                        <i class="bi bi-grid-3x3-gap me-2"></i>Explore Dashboard
+                    </a>
+                    <a href="{{ url_for('predict') }}" class="btn btn-glass btn-lg">
+                        <i class="bi bi-cpu me-2"></i>Make Prediction
+                    </a>
+                </div>
+                <div class="hero-tech-stack animate-fadeup delay-4">
+                    <span>Built with:</span>
+                    <div class="tech-pills">
+                        <span class="tech-pill">🐍 Python</span>
+                        <span class="tech-pill">🌶️ Flask</span>
+                        <span class="tech-pill">🤖 XGBoost</span>
+                        <span class="tech-pill">📊 Prophet</span>
+                        <span class="tech-pill">🧠 LSTM</span>
+                        <span class="tech-pill">🔍 SHAP</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+                <div class="hero-visual animate-float">
+                    <div class="weather-globe">
+                        <div class="globe-ring"></div>
+                        <div class="globe-ring ring-2"></div>
+                        <div class="globe-ring ring-3"></div>
+                        <div class="globe-center">
+                            <span class="globe-icon">🌍</span>
+                        </div>
+                        <div class="globe-stat stat-1">
+                            <span class="stat-icon">🌡️</span>
+                            <span class="stat-val">18.4°C</span>
+                        </div>
+                        <div class="globe-stat stat-2">
+                            <span class="stat-icon">💧</span>
+                            <span class="stat-val">67%</span>
+                        </div>
+                        <div class="globe-stat stat-3">
+                            <span class="stat-icon">💨</span>
+                            <span class="stat-val">15 km/h</span>
+                        </div>
+                        <div class="globe-stat stat-4">
+                            <span class="stat-icon">🌫️</span>
+                            <span class="stat-val">AQI 36</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="scroll-indicator">
+        <div class="scroll-dot"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ STATS BAR ════════════════════════════════ -->
+<section class="stats-bar">
+    <div class="container">
+        <div class="row g-0">
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="700000">0</div>
+                    <div class="stat-label">Weather Records</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="240">0</div>
+                    <div class="stat-label">Countries Covered</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="5">0</div>
+                    <div class="stat-label">ML Models</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number stat-pct" data-count="99">0</div>
+                    <div class="stat-label">Best Model R²</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ FEATURES ════════════════════════════════ -->
+<section class="features-section py-5">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <span class="section-tag">What We Do</span>
+            <h2 class="section-title">End-to-End ML Pipeline</h2>
+            <p class="section-subtitle">7 automated stages from raw data to interactive forecasts</p>
+        </div>
+        <div class="row g-4">
+            <!-- Feature cards -->
+            {% set features = [
+                ("bi-database-check", "Data Preprocessing", "Automated cleaning, outlier detection, feature engineering on 700K+ records from GlobalWeatherRepository.", "#00d4ff"),
+                ("bi-graph-up", "Exploratory Analysis", "20+ interactive visualizations: correlation heatmaps, seasonal trends, country comparisons, wind roses.", "#6bcb77"),
+                ("bi-cpu", "5-Model Forecasting", "Linear Regression, Random Forest, XGBoost, Facebook Prophet and LSTM neural network predictions.", "#ffd93d"),
+                ("bi-layers", "Stacking Ensemble", "Meta-learner Ridge Regression combining all base models for superior prediction accuracy.", "#ff6b6b"),
+                ("bi-eye", "SHAP Explainability", "SHAP beeswarm plots and permutation importance to understand which features drive predictions.", "#c77dff"),
+                ("bi-thermometer-sun", "Climate Analysis", "Anomaly detection, rolling temperature averages, AQI correlations, year-over-year comparisons.", "#ff9f43"),
+                ("bi-globe-europe-africa", "Spatial Mapping", "Interactive choropleth maps for temperature, AQI, and wind speed across all countries.", "#00d4ff"),
+                ("bi-flask", "Flask REST API", "JSON endpoints for predictions, plot listing, pipeline triggering, and model results.", "#6bcb77"),
+            ] %}
+            {% for icon, title, desc, color in features %}
+            <div class="col-sm-6 col-lg-3">
+                <div class="feature-card h-100" style="--accent: {{ color }}">
+                    <div class="feature-icon">
+                        <i class="bi {{ icon }}"></i>
+                    </div>
+                    <h5 class="feature-title">{{ title }}</h5>
+                    <p class="feature-desc">{{ desc }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ PLOTS PREVIEW ════════════════════════════ -->
+{% if preview_plots %}
+<section class="plots-preview-section py-5">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <span class="section-tag">Generated Outputs</span>
+            <h2 class="section-title">Latest Analytics</h2>
+            <p class="section-subtitle">Real plots from the ML pipeline</p>
+        </div>
+        <div class="row g-4">
+            {% for plot in preview_plots %}
+            <div class="col-md-6 col-lg-4">
+                <div class="plot-card" onclick="openPlotModal('{{ plot.url }}', '{{ plot.title }}')">
+                    <img src="{{ plot.url }}" alt="{{ plot.title }}" class="plot-img" loading="lazy"
+                         onerror="this.parentElement.style.display='none'">
+                    <div class="plot-overlay">
+                        <span class="plot-zoom"><i class="bi bi-zoom-in"></i></span>
+                        <span class="plot-title-overlay">{{ plot.title }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-glow">
+                <i class="bi bi-images me-2"></i>View All Plots
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ═══════════════════════════════ MODEL METRICS PREVIEW ════════════════════ -->
+<section class="metrics-preview py-5">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <span class="section-tag">Performance</span>
+            <h2 class="section-title">Model Comparison</h2>
+            <p class="section-subtitle">How our models perform on held-out test data</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="glass-card p-4">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0" id="homeMetricsTable">
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>RMSE ↓</th>
+                                    <th>MAE ↓</th>
+                                    <th>MAPE ↓</th>
+                                    <th>R² ↑</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody id="metricsTableBody">
+                                <tr><td colspan="6" class="text-center text-muted py-3">
+                                    <i class="bi bi-arrow-clockwise spin me-2"></i>Loading metrics…
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('models') }}" class="btn btn-outline-glow">
+                        <i class="bi bi-trophy me-2"></i>Full Model Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ PIPELINE CTA ════════════════════════════ -->
+<section class="cta-section py-5">
+    <div class="container">
+        <div class="cta-card">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h3 class="cta-title">Ready to run the full pipeline?</h3>
+                    <p class="cta-desc">
+                        Click <strong>Run Pipeline</strong> to automatically execute all 7 stages:
+                        preprocessing → EDA → forecasting → ensemble → SHAP → climate → spatial analysis.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <button class="btn btn-primary-glow btn-lg me-2" onclick="runPipeline()">
+                        <i class="bi bi-play-circle me-2"></i>Run Pipeline
+                    </button>
+                    <a href="{{ url_for('predict') }}" class="btn btn-glass btn-lg">
+                        <i class="bi bi-cpu me-2"></i>Quick Predict
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════ PLOT MODAL ══════════════════════════════ -->
+<div class="modal fade" id="plotModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="plotModalTitle">Plot</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0 text-center">
+                <img id="plotModalImg" src="" alt="" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load metrics table on page load
+fetch('/api/model-results')
+    .then(r => r.json())
+    .then(data => {
+        const tbody = document.getElementById('metricsTableBody');
+        const ratings = ['⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐', '🏆'];
+        tbody.innerHTML = data.results.map((r, i) => `
+            <tr class="${r.Model.includes('Ensemble') || r.Model.includes('XGBoost') ? 'table-success-subtle' : ''}">
+                <td><strong>${r.Model}</strong></td>
+                <td><span class="metric-badge rmse">${r.RMSE}</span></td>
+                <td><span class="metric-badge mae">${r.MAE}</span></td>
+                <td>${r.MAPE}%</td>
+                <td><span class="metric-badge r2">${r.R2}</span></td>
+                <td>${ratings[Math.min(i, ratings.length-1)]}</td>
+            </tr>
+        `).join('');
+    })
+    .catch(() => {
+        document.getElementById('metricsTableBody').innerHTML =
+            '<tr><td colspan="6" class="text-center text-muted">Run the pipeline to see results.</td></tr>';
+    });
+
+// Counter animation
+document.addEventListener('DOMContentLoaded', () => {
+    const counters = document.querySelectorAll('[data-count]');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounter(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.3 });
+    counters.forEach(c => observer.observe(c));
+});
+
+function animateCounter(el) {
+    const target = parseInt(el.dataset.count);
+    const isPct  = el.classList.contains('stat-pct');
+    const suffix = isPct ? '%' : target >= 1000 ? '+' : '';
+    const duration = 1500;
+    const start    = performance.now();
+    const update = (now) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = Math.round(eased * target);
+        el.textContent = value >= 1000
+            ? (value / 1000).toFixed(0) + 'K' + suffix
+            : value + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+}
+
+function openPlotModal(url, title) {
+    document.getElementById('plotModalImg').src = url;
+    document.getElementById('plotModalTitle').textContent = title;
+    new bootstrap.Modal(document.getElementById('plotModal')).show();
+}
+</script>
+{% endblock %}

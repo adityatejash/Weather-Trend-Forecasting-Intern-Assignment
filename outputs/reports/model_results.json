@@ -1,0 +1,37 @@
+[
+  {
+    "Model": "Linear Regression",
+    "RMSE": 6.7528,
+    "MAE": 5.231,
+    "MAPE": 93093247.9932,
+    "R2": 0.5121
+  },
+  {
+    "Model": "Random Forest",
+    "RMSE": 4.3333,
+    "MAE": 2.9228,
+    "MAPE": 35031734.0987,
+    "R2": 0.7991
+  },
+  {
+    "Model": "XGBoost",
+    "RMSE": 3.9721,
+    "MAE": 2.7386,
+    "MAPE": 31347165.9197,
+    "R2": 0.8312
+  },
+  {
+    "Model": "Prophet",
+    "RMSE": 6.7978,
+    "MAE": 5.3807,
+    "MAPE": 60.04,
+    "R2": -0.11
+  },
+  {
+    "Model": "Stacking Ensemble",
+    "RMSE": 4.4323,
+    "MAE": 3.1219,
+    "MAPE": 35818060.7533,
+    "R2": 0.7898
+  }
+]

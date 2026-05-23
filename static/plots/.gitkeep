@@ -1,0 +1,3 @@
+# This file ensures the outputs/plots/ directory is tracked by Git.
+# Actual plot files (*.png, *.html) are excluded via .gitignore.
+# Run the pipeline to regenerate: python app.py → click "Run Pipeline"

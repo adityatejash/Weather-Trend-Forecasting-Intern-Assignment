@@ -1,0 +1,3 @@
+# Keep the data folder tracked but ignore large CSV files
+# (CSV is listed in .gitignore at the root)
+# This placeholder ensures the data/ directory is committed to git

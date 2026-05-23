@@ -1,0 +1,3 @@
+# This file ensures the outputs/models/ directory is tracked by Git.
+# Trained model files (*.pkl, *.json, *.keras) are excluded via .gitignore.
+# Run the pipeline to regenerate models: python app.py → click "Run Pipeline"

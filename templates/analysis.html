@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Climate & AQI Analysis — WeatherAI{% endblock %}
+
+{% block content %}
+<div class="page-hero page-hero-sm">
+    <div class="container">
+        <h1 class="page-title"><i class="bi bi-bar-chart-line me-3"></i>Climate &amp; AQI Analysis</h1>
+        <p class="page-subtitle">Deep-dive into climate trends, anomaly detection, and air quality analysis</p>
+    </div>
+</div>
+
+<div class="container py-5">
+
+    <!-- AQI Category Info Cards -->
+    <div class="row g-3 mb-5">
+        <div class="col-12">
+            <h5 class="text-white mb-3"><i class="bi bi-lungs me-2 text-warning"></i>AQI Categories</h5>
+        </div>
+        {% set aqi_categories = [
+            ("Good", "0–12", "#6bcb77", "bi-emoji-smile"),
+            ("Moderate", "12–35", "#ffd93d", "bi-emoji-neutral"),
+            ("Unhealthy (SG)", "35–55", "#ff9f43", "bi-emoji-frown"),
+            ("Unhealthy", "55–150", "#ff6b6b", "bi-emoji-angry"),
+            ("Very Unhealthy", "150–250", "#c77dff", "bi-exclamation-diamond"),
+            ("Hazardous", "250+", "#ff4757", "bi-radioactive"),
+        ] %}
+        {% for label, range_, color, icon in aqi_categories %}
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="aqi-card" style="border-left: 4px solid {{ color }}">
+                <i class="bi {{ icon }}" style="color: {{ color }}; font-size:1.5rem"></i>
+                <div class="aqi-label" style="color: {{ color }}">{{ label }}</div>
+                <div class="aqi-range text-muted small">PM2.5: {{ range_ }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Analysis Plots -->
+    {% if plots %}
+    <h5 class="text-white mb-4"><i class="bi bi-images me-2 text-primary"></i>Analysis Plots</h5>
+    <div class="row g-4">
+        {% for plot in plots %}
+        <div class="col-md-6">
+            <div class="glass-card p-3">
+                <h6 class="text-muted small mb-2">{{ plot.title }}</h6>
+                <div class="plot-card-full" onclick="openPlotModal('{{ plot.url }}', '{{ plot.title }}')">
+                    <img src="{{ plot.url }}" alt="{{ plot.title }}" class="img-fluid rounded"
+                         style="width:100%; object-fit:cover; cursor:zoom-in"
+                         onerror="this.closest('.col-md-6').style.display='none'">
+                    <div class="plot-expand-overlay">
+                        <i class="bi bi-zoom-in fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Placeholder cards -->
+    <div class="empty-state glass-card text-center py-5 mb-4">
+        <div class="empty-icon">🌡️</div>
+        <h4 class="text-white mt-3">No Analysis Plots Yet</h4>
+        <p class="text-muted">Run the ML pipeline to generate climate and AQI analysis visualizations.</p>
+        <button class="btn btn-primary-glow mt-2" onclick="runPipeline()">
+            <i class="bi bi-play-circle me-2"></i>Run Pipeline
+        </button>
+    </div>
+
+    <!-- Static insight cards -->
+    <div class="row g-4">
+        <div class="col-12">
+            <h5 class="text-white mb-3"><i class="bi bi-lightbulb me-2 text-warning"></i>What You'll See After Running the Pipeline</h5>
+        </div>
+        {% set analysis_features = [
+            ("🌡️", "Rolling Temperature", "30-day and 90-day moving averages to reveal long-term warming trends in the global dataset."),
+            ("📅", "Year-over-Year", "Monthly temperature comparisons across all years in the dataset to identify seasonal patterns."),
+            ("🌫️", "AQI vs Weather", "Scatter plots showing correlations between PM2.5/PM10 levels and weather conditions."),
+            ("⚠️", "Anomaly Detection", "Z-score based outlier detection flagging extreme weather events (|Z| > 3σ)."),
+            ("🕸️", "Radar Chart", "Multi-metric continent comparison using radar/spider charts for 6 weather variables."),
+            ("🗺️", "Choropleth Maps", "Interactive world maps for temperature, AQI, and wind speed by country."),
+        ] %}
+        {% for emoji, title, desc in analysis_features %}
+        <div class="col-md-6 col-lg-4">
+            <div class="insight-card glass-card p-4">
+                <span class="insight-emoji">{{ emoji }}</span>
+                <h6 class="text-white mt-2">{{ title }}</h6>
+                <p class="text-muted small mb-0">{{ desc }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Key climate insights -->
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <h5 class="text-white mb-3"><i class="bi bi-clipboard-data me-2 text-success"></i>Key Findings</h5>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <h6 class="text-white mb-3">🌡️ Temperature Insights</h6>
+                <ul class="insight-list">
+                    <li>Global mean temperature hovers around <strong>18.4°C</strong></li>
+                    <li>Summer months (Jun–Aug) show highest variability</li>
+                    <li>Tropical countries show smallest seasonal swings</li>
+                    <li>Urban heat islands visible in dense city data</li>
+                    <li>Dew point is the strongest temperature predictor (SHAP)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <h6 class="text-white mb-3">🌫️ AQI Insights</h6>
+                <ul class="insight-list">
+                    <li>Average composite AQI across all stations: <strong>35.8</strong></li>
+                    <li>South/Southeast Asia shows highest PM2.5 levels</li>
+                    <li>Higher humidity correlates with higher PM10 readings</li>
+                    <li>Wind speed &gt; 30 km/h shows notable AQI reduction</li>
+                    <li>Winter months show worst air quality globally</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Plot Modal -->
+<div class="modal fade" id="plotModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="plotModalTitle">Plot</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-2 text-center">
+                <img id="plotModalImg" src="" alt="" class="img-fluid rounded" style="max-height:80vh">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openPlotModal(url, title) {
+    document.getElementById('plotModalImg').src = url;
+    document.getElementById('plotModalTitle').textContent = title;
+    new bootstrap.Modal(document.getElementById('plotModal')).show();
+}
+</script>
+{% endblock %}
