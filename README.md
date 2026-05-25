@@ -174,4 +174,4 @@ curl -X POST http://127.0.0.1:5000/api/run-pipeline
 
 ## 📄 License
 
-MIT License — PM Accelerator Data Science Internship 2024
+MIT License — PM Accelerator Data Science Internship 2026
